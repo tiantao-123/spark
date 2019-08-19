@@ -1,0 +1,53 @@
+# 该配置文件刷新时间间隔（默认是-1，表示永远不刷新）
+#     该参数与spark.basic.switch联合使用，当spark.basic.switch改成N 时，修改的结果被刷新到程序中，spark就可以自动关闭spark Streaming程序。
+#     （推荐使用设置刷新时间，在关闭sparkStreaming前，可以释放一些系统占用的资源，eg：redis的连接，jdbc连接....）
+conf.reflush.interval: 5000
+
+# spark 基本参数配置
+spark.basic:
+  appName: spark-streaming
+  # master
+  master: local[2]
+  # spark 序列化对象的方式
+  spark.serializer: org.apache.spark.serializer.KryoSerializer
+  # spark的执行状态，如果是N，那么会自动关闭spark Streaming程序
+  switch: Y
+  # 设置batch的时间间隔
+  duration: 3
+  # checkPoint 目录 (为空不设置)
+  checkpoint.path:
+  # 创建SparkConf对象时的参数配置
+  spark.conf:
+    # 设置多少毫秒收集一次数据 (默认分区数= spark.duration / 200)
+    spark.blockInterval: 200
+
+# spark 参数配置
+spark.streaming:
+  # spark streaming 功能列表
+  functions:
+  - clazzName: com.tiantao.spark.streaming.handler.impl.TestStreamingHandler
+    topic: test-tt1
+    desc: "测试"
+    params: 1
+  - clazzName: com.tiantao.spark.streaming.handler.impl.Test2StreamingHandler
+    topic: one_test
+    desc: "测试"
+    params: 1
+
+# kafka 配置参数
+spark.kafka:
+  topics: test-tt1,one_test
+  params:
+    group.id: CID_PV_test
+    bootstrap.servers: 192.168.15.167:9092,192.168.15.168:9092,192.168.15.169:9092
+    key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    session.timeout.ms: 20000
+    # 数据初始消费方式：earliest（无提交的offset时，从头开始消费） latest（无提交的offset时，从新来的开始消费） none（无提交的offset时，抛出异常）
+    auto.offset.reset: earliest
+  # 存储offset的配置信息
+  offset.params:
+    redis.redisHost: 192.168.11.22
+    redis.redisPort: 6379
+    redis.redisPassword: redis1234567
+
